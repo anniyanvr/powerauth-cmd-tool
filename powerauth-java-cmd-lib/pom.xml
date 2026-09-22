@@ -5,21 +5,19 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>powerauth-java-cmd-lib</artifactId>
+    <name>powerauth-java-cmd-lib</name>
     <description>PowerAuth Command-line Utility - Java Library</description>
-    <version>1.4.0-SNAPSHOT</version>
 
     <parent>
         <artifactId>powerauth-cmd-parent</artifactId>
-        <groupId>io.getlime.security</groupId>
-        <version>1.4.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <groupId>com.wultra.security</groupId>
+        <version>2.3.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-cli</groupId>
@@ -43,32 +41,28 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>io.getlime.security</groupId>
+            <groupId>com.wultra.security</groupId>
             <artifactId>powerauth-restful-model</artifactId>
-            <version>${powerauth.version}</version>
+            <version>${powerauth-restful-integration}</version>
         </dependency>
         <dependency>
-            <groupId>io.getlime.security</groupId>
+            <groupId>com.wultra.security</groupId>
             <artifactId>powerauth-java-crypto</artifactId>
-            <version>${powerauth.version}</version>
+            <version>${powerauth-crypto.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.getlime.security</groupId>
+            <groupId>com.wultra.security</groupId>
             <artifactId>powerauth-java-http</artifactId>
-            <version>${powerauth.version}</version>
+            <version>${powerauth-crypto.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>${bc.version}</version>
-            <scope>provided</scope>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
-            <version>${spring-boot.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>log4j-to-slf4j</artifactId>
@@ -79,21 +73,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
-            <version>${spring-boot.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>io.getlime.core</groupId>
+            <groupId>com.wultra.core</groupId>
             <artifactId>rest-client-base</artifactId>
-            <version>${wultra-java-core.version}</version>
+            <version>${wultra-core.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-        </dependency>
-
     </dependencies>
 
 </project>

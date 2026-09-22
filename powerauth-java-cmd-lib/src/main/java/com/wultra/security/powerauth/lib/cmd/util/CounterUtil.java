@@ -1,0 +1,96 @@
+/*
+ * PowerAuth Command-line utility
+ * Copyright 2018 Wultra s.r.o.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.wultra.security.powerauth.lib.cmd.util;
+
+import com.wultra.security.powerauth.crypto.lib.generator.HashBasedCounter;
+import com.wultra.security.powerauth.crypto.lib.model.exception.CryptoProviderException;
+import com.wultra.security.powerauth.crypto.lib.model.exception.GenericCryptoException;
+import com.wultra.security.powerauth.lib.cmd.consts.PowerAuthVersion;
+import com.wultra.security.powerauth.lib.cmd.logging.StepLogger;
+import com.wultra.security.powerauth.lib.cmd.steps.pojo.ResultStatusObject;
+import org.springframework.util.Assert;
+
+import java.util.Base64;
+
+/**
+ * Helper class for counter.
+ *
+ * @author Roman Strobl, roman.strobl@wultra.com
+ *
+ */
+public class CounterUtil {
+
+    /**
+     * Get counter data. In activation version 2, numeric counter is converted to counter data. In version 3 the
+     * counter data is available in model.
+     * @param resultStatusObject Activation status object.
+     * @param stepLogger Step logger.
+     * @return Counter data.
+     */
+    public static byte[] getCtrData(ResultStatusObject resultStatusObject, StepLogger stepLogger) {
+        byte[] ctrData = new byte[16];
+        int version = resultStatusObject.getVersion().intValue();
+        switch (version) {
+            case 3, 4 -> {
+                String ctrDataBase64 = resultStatusObject.getCtrData();
+                if (!ctrDataBase64.isEmpty()) {
+                    ctrData = Base64.getDecoder().decode(ctrDataBase64);
+                }
+            }
+            default -> {
+                if (stepLogger != null) {
+                    stepLogger.writeItem(
+                            "generic-error-version",
+                            "Unsupported version",
+                            "The version you specified is not supported",
+                            "ERROR",
+                            null
+                    );
+                }
+            }
+        }
+        return ctrData;
+    }
+
+    /**
+     * Increment counter value in result status object
+     *
+     * @param resultStatusObject Result status object.
+     * @throws CryptoProviderException In case crypto provider is initialized incorrectly.
+     * @throws GenericCryptoException In case counter value could not be incremented.
+     */
+    public static void incrementCounter(ResultStatusObject resultStatusObject) throws CryptoProviderException, GenericCryptoException {
+        // Increment the numeric counter
+        Long counter = resultStatusObject.getCounter();
+        counter += 1;
+        resultStatusObject.setCounter(counter);
+
+        // Increment the hash based counter
+        String ctrDataBase64 = resultStatusObject.getCtrData();
+        if (!ctrDataBase64.isEmpty()) {
+            final byte[] ctrData = Base64.getDecoder().decode(ctrDataBase64);
+            final byte[] nextCrtData = switch (resultStatusObject.getVersion().intValue()) {
+                case 3 -> new HashBasedCounter(PowerAuthVersion.V3_3.value()).next(ctrData);
+                case 4 -> new HashBasedCounter(PowerAuthVersion.V4_0.value()).next(ctrData);
+                default -> throw new IllegalStateException("Unsupported version: " + resultStatusObject.getVersion());
+            };
+            Assert.state(nextCrtData != null, "nextCrtData must not be null");
+            resultStatusObject.setCtrData(Base64.getEncoder().encodeToString(nextCrtData));
+        }
+    }
+
+}
